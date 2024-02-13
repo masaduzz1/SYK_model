@@ -1,6 +1,7 @@
 from scipy import linalg as sLA
 import numpy as np
 from numpy import linalg as LA
+from scipy.linalg import expm,eig
 
 
 
@@ -42,4 +43,36 @@ def otoc(rho_beta4,tt,syk_op,W,V):
     #B=np.real(np.trace( W_t_sqr_V_sqr))
     #display(array_to_latex(RWt_RV_RWt_RV))
     return A
+
+
+# The function computes eigenvalues and eigenvectors and order them from lower eigenvalue
+# to higher eigenvalue, columns of 2D eigenvector matrix are adjusted accordingly
+def compute_eigens(H):
+    x,xvec=sLA.eig(H)
+    
+    sort_arg=np.argsort(x)
+    
+    Eval=x[sort_arg]
+    Evec=xvec[:,sort_arg]
+    return Eval, Evec
+
+#Computes spectral form factor (k) with the definition for one disorder Hamiltonian
+#def: 1/D^2 *  \sum exp(-1.0 j *(Ei-Ej)t )
+# Need to call this many times with many disorder Hamiltonian to get meaningful result of SFF
+def compute_sff_instance(E,t):
+    sff=0
+    for i in range(len(E)):
+        for j in range(len(E)):
+            sff += np.exp(1.0j* (E[i]-E[j])*t )
+    
+    return sff/(len(E)**2)
+
+
+#Computes spectral form factor (k) with the Trace definition for one disorder Hamiltonian
+#def: 1/D^2 *  Tr(Ut) Tr(Ut^\dagger)
+# Need to call this many times with many disorder Hamiltonian to get meaningful result of SFF
+def compute_sff_instance2(H,t):
+    Ut= expm(-1.0j*H*t)
+    
+    return np.real(np.trace(Ut)  * np.trace(np.conj(Ut.T) ) )/(len(H)**2)
 
