@@ -76,3 +76,39 @@ def compute_sff_instance2(H,t):
     
     return np.real(np.trace(Ut)  * np.trace(np.conj(Ut.T) ) )/(len(H)**2)
 
+
+####SFF is the Fourier transform of the two point energy desnity
+#$$ K(t)=avg_{disorder} sff
+#$$
+#########
+def sff_zerobeta(Harr,t):
+    SFF=np.zeros(len(t))
+    for i in range(len(Harr)):
+        Eval,Evec=compute_eigens(Harr[i])
+        for ind in range(len(t)):
+            SFF[ind]=SFF[ind]+np.real(compute_sff_instance(Eval,t[ind]))
+
+
+
+    SFF=SFF/len(Harr)
+    return SFF
+def sff_zerobeta_def2(Harr,t):
+    SFF=np.zeros(len(t))
+    for i in range(len(Harr)):
+        for ind in range(len(t)):
+            SFF[ind]=SFF[ind]+np.real(compute_sff_instance2(Harr[i],t[ind]))
+
+
+
+    SFF=SFF/len(Harr)
+    return SFF
+
+#  If there is temperature involved,
+# $$g(t ; \beta) \equiv < Z(beta, t) Z^*(beta, t)>/ < Z(\beta)>^2$$
+# Z(beta,t)=Tr(\exp(-beta H -i H t))
+
+def compute_sff_instance_beta(H,t,beta):
+    Ut= np.trace(expm(-beta*H-1.0j*H*t) )
+    Utdag=np.conj(Ut)
+    return Ut*Utdag
+

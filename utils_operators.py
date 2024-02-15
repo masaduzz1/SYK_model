@@ -130,7 +130,7 @@ def make_Majorana(N):
     return psi
 
 
-def make_Hamiltonian(psi, N, instances, J_squared):
+def SYK_Hamiltonian(psi, N, instances, J_squared):
     
     # Creates multiple realisations of the SYK Hamiltonian
     # Variance of couplings is given by 'J_squared * 3!/N^3'.
@@ -150,4 +150,33 @@ def make_Hamiltonian(psi, N, instances, J_squared):
                     H = H + np.array([element * M for element in J[i, j, k, l]])
 
     return H
+
+def single_SYK_Hamiltonian(psi, N, J_squared):
+    
+    # Creates multiple realisations of the SYK Hamiltonian
+    # Variance of couplings is given by 'J_squared * 3!/N^3'.
+
+    H = 0
+    sigma_sq = 6.*J_squared/(N**3)
+    sigma = math.sqrt(sigma_sq)
+    
+    
+
+    # Generate all possible combinations of indices
+    indices = np.array(np.meshgrid(range(1, N+1), range(1, N+1), range(1, N+1), range(1, N+1))).T.reshape(-1, 4)
+
+    # Select unique combinations where i < j < k < l
+    indices = indices[np.all(np.diff(indices, axis=1) > 0, axis=1)]
+
+    # Generate random values for J outside the loop
+    Js = np.random.normal(loc=0, scale=sigma, size=len(indices))
+
+    # Compute M for each combination and add to H
+    for idx, (i, j, k, l) in enumerate(indices):
+        M = np.dot(np.dot(np.dot(psi[i], psi[j]), psi[k]), psi[l])
+        H += Js[idx] * M
+
+
+    return H
+
 
